@@ -1,7 +1,7 @@
 # TechRAG
 
 <p align="center">
-  <a href="https://huggingface.co/spaces/turancannb02/techrag"><img src="https://img.shields.io/badge/HuggingFace%20Spaces-Live%20Demo-FFD21E?style=plastic&logo=huggingface&logoColor=black" alt="Hugging Face Live Demo"></a>
+
   <img src="https://img.shields.io/badge/Language-Python-blue?style=plastic&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/Framework-LangChain-0EA5E9?style=plastic" alt="LangChain">
   <img src="https://img.shields.io/badge/Vector%20Store-FAISS-111827?style=plastic" alt="FAISS">
