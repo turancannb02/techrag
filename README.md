@@ -29,7 +29,8 @@ The project is implemented as a practical local-first pipeline: ingest documents
 ## Live Demo
 
 - Hugging Face Space: https://huggingface.co/spaces/turancannb02/techrag
-- On Spaces, if `storage/` index files are missing, the app auto-builds a fresh index on startup from `data/` (or falls back to `demo_data/`).
+- On Spaces, if `storage/` index files are missing, the app auto-builds a fresh index on startup from `data/demo` (then `data/`).
+- Optional fallback can be enabled with `TECHRAG_ALLOW_DEMO_FALLBACK=1` (uses `demo_data/` only when main sources are unavailable).
 
 ## Branches
 

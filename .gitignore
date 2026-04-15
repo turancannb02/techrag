@@ -2,6 +2,7 @@
 .venv/
 __pycache__/
 *.pyc
+*/__pycache__/
 storage/
 .DS_Store
 .env
@@ -9,3 +10,6 @@ storage/
 storage/
 data/raw/
 data/processed_md/
+data/*
+!data/demo/
+!data/demo/**

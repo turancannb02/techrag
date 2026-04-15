@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from time import perf_counter
 
@@ -34,23 +35,48 @@ def ensure_index_ready(config_path: str = "config.yaml") -> None:
     chunks_file = Path(cfg["storage"]["chunks_file"])
     faiss_file = index_dir / "index.faiss"
     pkl_file = index_dir / "index.pkl"
+    allow_demo_fallback = os.getenv("TECHRAG_ALLOW_DEMO_FALLBACK", "0") == "1"
+    source_candidates = [Path("data/demo"), Path("data")]
+    if allow_demo_fallback:
+        source_candidates.append(Path("demo_data"))
+
+    def newest_source_mtime() -> float:
+        mtimes: list[float] = []
+        for candidate in source_candidates:
+            if not candidate.exists():
+                continue
+            for p in candidate.rglob("*"):
+                if p.is_file():
+                    mtimes.append(p.stat().st_mtime)
+        return max(mtimes) if mtimes else 0.0
 
     if faiss_file.exists() and pkl_file.exists() and chunks_file.exists():
-        return
-
-    source_candidates = [Path("data"), Path("demo_data")]
+        if faiss_file.stat().st_mtime >= newest_source_mtime():
+            return
+        st.info("Source files changed. Rebuilding index...")
     source_dir = next((p for p in source_candidates if p.exists()), None)
     if source_dir is None:
-        raise RuntimeError("No source directory found. Expected `data/` or `demo_data/`.")
+        if allow_demo_fallback:
+            raise RuntimeError("No source directory found. Expected `data/` or `demo_data/`.")
+        raise RuntimeError(
+            "No source directory found. Expected `data/`.\n"
+            "This app is in dev-like mode (no demo fallback). "
+            "To enable fallback, set TECHRAG_ALLOW_DEMO_FALLBACK=1."
+        )
 
     docs = list(iter_documents(source_dir))
-    if not docs and source_dir.name != "demo_data":
+    if not docs and allow_demo_fallback and source_dir.name != "demo_data":
         fallback = Path("demo_data")
         if fallback.exists():
             docs = list(iter_documents(fallback))
             source_dir = fallback
     if not docs:
-        raise RuntimeError("No supported documents found to build index.")
+        if allow_demo_fallback:
+            raise RuntimeError("No supported documents found to build index.")
+        raise RuntimeError(
+            "No supported documents found under `data/`.\n"
+            "Add docs to `data/` and restart, or set TECHRAG_ALLOW_DEMO_FALLBACK=1."
+        )
 
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=cfg["chunking"]["chunk_size"],
