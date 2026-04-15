@@ -4,6 +4,9 @@ import os
 from pathlib import Path
 from time import perf_counter
 
+# Workaround for OpenMP duplication crashes on some local macOS setups.
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+
 import streamlit as st
 from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
