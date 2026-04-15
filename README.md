@@ -19,6 +19,12 @@ TechRAG uses a practical local-first workflow: ingest documents, build a FAISS i
 - Hugging Face Space: https://huggingface.co/spaces/turancannb02/techrag
 - On Spaces, if `storage/` index files are missing, the app auto-builds a fresh index on startup from `data/` (or falls back to `demo_data/`).
 
+## Demo
+
+> **Note:** On first load, HF Space auto-builds the index from `data/demo/` — this is expected, not an error.
+
+![TechRAG HF Space Demo](assets/demo_hf_space.png)
+
 ## Branches
 
 - `main`: primary development branch (local-first workflow and project source of truth)
