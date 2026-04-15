@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Iterable
+
+# Workaround for OpenMP duplication crashes on some local macOS setups.
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
 
 import yaml
 from bs4 import BeautifulSoup

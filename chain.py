@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import os
 from dataclasses import dataclass
 from time import perf_counter
 from typing import Iterator
+
+# Workaround for OpenMP duplication crashes on some local macOS setups.
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
 
 import yaml
 from langchain_ollama import ChatOllama

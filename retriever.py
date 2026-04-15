@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
+
+# Workaround for OpenMP duplication crashes on some local macOS setups.
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
 
 import yaml
 from langchain.docstore.document import Document
