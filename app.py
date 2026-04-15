@@ -1,15 +1,73 @@
 from __future__ import annotations
 
+from pathlib import Path
 from time import perf_counter
 
 import streamlit as st
+from langchain_community.vectorstores import FAISS
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from chain import TechRAG
+from ingest import iter_documents, load_config, save_chunks
+
+try:
+    from backends import get_embeddings as resolve_embeddings
+except ImportError:
+    from langchain_ollama import OllamaEmbeddings
+
+    def resolve_embeddings(cfg: dict):
+        return OllamaEmbeddings(
+            model=cfg["models"]["embedding"],
+            base_url=cfg["models"]["base_url"],
+        )
 
 
 @st.cache_resource
 def get_rag() -> TechRAG:
+    ensure_index_ready()
     return TechRAG()
+
+
+def ensure_index_ready(config_path: str = "config.yaml") -> None:
+    cfg = load_config(config_path)
+    index_dir = Path(cfg["storage"]["index_dir"])
+    chunks_file = Path(cfg["storage"]["chunks_file"])
+    faiss_file = index_dir / "index.faiss"
+    pkl_file = index_dir / "index.pkl"
+
+    if faiss_file.exists() and pkl_file.exists() and chunks_file.exists():
+        return
+
+    source_candidates = [Path("data"), Path("demo_data")]
+    source_dir = next((p for p in source_candidates if p.exists()), None)
+    if source_dir is None:
+        raise RuntimeError("No source directory found. Expected `data/` or `demo_data/`.")
+
+    docs = list(iter_documents(source_dir))
+    if not docs and source_dir.name != "demo_data":
+        fallback = Path("demo_data")
+        if fallback.exists():
+            docs = list(iter_documents(fallback))
+            source_dir = fallback
+    if not docs:
+        raise RuntimeError("No supported documents found to build index.")
+
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=cfg["chunking"]["chunk_size"],
+        chunk_overlap=cfg["chunking"]["overlap"],
+        separators=["\n\n", "\n", " ", ""],
+    )
+    chunks = splitter.split_documents(docs)
+    for i, chunk in enumerate(chunks):
+        chunk.metadata["chunk_id"] = i
+
+    embeddings = resolve_embeddings(cfg)
+    vectorstore = FAISS.from_documents(chunks, embeddings)
+    index_dir.parent.mkdir(parents=True, exist_ok=True)
+    vectorstore.save_local(str(index_dir))
+    save_chunks(chunks, chunks_file)
+
+    st.info(f"Index was missing and has been built from `{source_dir}`.")
 
 
 def render_sources(sources: list[dict]) -> None:
