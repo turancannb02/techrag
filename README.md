@@ -61,7 +61,7 @@ TechRAG supports backend switching via `config.yaml`:
 
 HF Spaces-friendly default:
 
-- `llm_backend: groq` with `GROQ_API_KEY` in environment secrets
+- `llm_backend: groq` with `GROQ_API_KEY` in environment secrets (`openai/gpt-oss-20b`)
 - `embedding_backend: huggingface` with a sentence-transformers model
 
 If you change embedding model or embedding backend, rebuild the index (`ingest.py`) before querying.
@@ -76,7 +76,7 @@ uv sync
 
 Current default in `config.yaml` is:
 
-- LLM: Groq (`llama-3.3-70b-versatile`)
+- LLM: Groq (`openai/gpt-oss-20b`)
 - Embeddings: HuggingFace (`sentence-transformers/all-MiniLM-L6-v2`)
 
 Set your API key:
@@ -212,7 +212,7 @@ retrieval:
 models:
   llm_backend: groq
   embedding_backend: huggingface
-  llm: llama-3.3-70b-versatile
+  llm: openai/gpt-oss-20b
   embedding: sentence-transformers/all-MiniLM-L6-v2
   base_url: http://localhost:11434
 

@@ -9,7 +9,7 @@ retrieval:
 models:
   llm_backend: groq
   embedding_backend: huggingface
-  llm: llama-3.3-70b-versatile
+  llm: openai/gpt-oss-20b
   embedding: sentence-transformers/all-MiniLM-L6-v2
   base_url: http://localhost:11434
 
