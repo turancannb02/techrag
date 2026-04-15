@@ -145,6 +145,39 @@ With token streaming:
 uv run python chain.py --query "What does the LangChain retrieval documentation say about retrieval-augmented generation?" --stream --show-timings
 ```
 
+### Sample CLI Output
+
+```bash
+uv run python chain.py --query "How does TS 38.300 describe NR and NG-RAN architecture at a high level?" --show-timings
+```
+
+```text
+Answer:
+
+Based on the provided context, TS 38.300 describes the overall architecture by defining an NG-RAN node as either [1]:
+
+*   A **gNB**, providing NR user plane and control plane protocol terminations towards the UE.
+*   An **ng-eNB**, providing E-UTRA user plane and control plane protocol terminations towards the UE.
+
+Additionally, the **Xn** interface is defined as the network interface between NG-RAN nodes [1].
+
+Sources:
+- data/processed_md/38300-j10.md (chunk=138, score=0.8852)
+- data/processed_md/38300-j10.md (chunk=1351, score=0.8637)
+- data/processed_md/38300-j10.md (chunk=0, score=0.8595)
+- data/processed_md/38300-j10.md (chunk=227, score=0.718)
+- data/processed_md/38300-j10.md (chunk=1352, score=0.7083)
+
+Timings (ms):
+- retrieval: 241.84
+- prompt_build: 0.04
+- llm_inference: 53211.59
+- postprocess: 0.03
+- total: 53453.5
+```
+
+![CLI Query Example](assets/query_1.png)
+
 ### 4. Run API server
 
 ```bash
@@ -234,9 +267,20 @@ Use `--show-timings` to inspect latency contributors:
 - `postprocess_ms`
 - `total_ms`
 
-In most runs, `llm_inference_ms` dominates total time.
+- In most runs, `llm_inference_ms` dominates total time.
+- On Groq free tier, expect roughly **50–65 seconds cold start** for the first query after startup.
+- Local Ollama inference is typically slower in absolute speed, but more consistent across repeated runs once models are loaded.
+- First-query latency spikes are expected and do not necessarily indicate a broken pipeline.
 
-## Troubleshooting
+## What I Learned
+
+- Retrieval quality is more sensitive to chunking strategy and corpus hygiene than expected.
+- Hybrid retrieval (semantic + BM25) is consistently more robust than dense retrieval alone on standards-style documents.
+- Citation grounding materially improves trustworthiness when answering dense technical questions.
+- Small operational details (index freshness, model/backend alignment, runtime env) matter as much as model choice for a stable demo.
+
+<details>
+<summary><strong>Troubleshooting</strong></summary>
 
 - Error: `No supported documents found in data`
   - Add `.md`, `.txt`, `.pdf`, or `.html` files to `data/`, then rerun ingestion.
@@ -246,6 +290,8 @@ In most runs, `llm_inference_ms` dominates total time.
   - Set `GROQ_API_KEY` in env (or HF Space secrets / local `.env`) when `llm_backend: groq`.
 - Retrieval quality drops after changing embedding model
   - Rebuild index with `uv run python ingest.py --source data`.
+
+</details>
 
 ## Project Structure
 
