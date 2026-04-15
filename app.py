@@ -133,7 +133,7 @@ def main() -> None:
 
     query = st.text_area(
         "Question",
-        value="Summarize the key channel modeling assumptions in 3GPP TR 38.901.",
+        value="How does TS 38.300 describe NR and NG-RAN architecture at a high level?",
         height=100,
         placeholder="Ask about your technical corpus...",
     )
