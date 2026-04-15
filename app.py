@@ -104,7 +104,7 @@ def main() -> None:
 
     query = st.text_area(
         "Question",
-        value="What are the key waveform candidates for 6G?",
+        value="Summarize the key channel modeling assumptions in 3GPP TR 38.901.",
         height=100,
         placeholder="Ask about your technical corpus...",
     )
