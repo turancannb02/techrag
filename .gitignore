@@ -1,0 +1,14 @@
+.history/
+.venv/
+__pycache__/
+*/__pycache__/
+*.pyc
+.DS_Store
+
+.env
+
+# Generated index artifacts
+storage/
+
+# Local corpora and test datasets
+data/*
