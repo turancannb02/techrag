@@ -26,7 +26,7 @@ forums](https://discuss.streamlit.io).
   <img src="https://img.shields.io/badge/API-FastAPI-009688?style=plastic&logo=fastapi&logoColor=white" alt="FastAPI">
   <img src="https://img.shields.io/badge/UI-Streamlit-FF4B4B?style=plastic&logo=streamlit&logoColor=white" alt="Streamlit">
   <img src="https://img.shields.io/badge/Package%20Manager-uv-4B5563?style=plastic" alt="uv">
-  <img src="https://img.shields.io/badge/Inference-Ollama-111827?style=plastic" alt="Ollama">
+  <img src="https://img.shields.io/badge/Inference-Groq%20%7C%20Ollama-111827?style=plastic" alt="Groq and Ollama">
 </p>
 
 A production-oriented retrieval-augmented generation (RAG) project for technical documentation.
@@ -51,7 +51,7 @@ The current repository contains a working MVP with:
 - **Multi-format ingestion** (`.pdf`, `.md`, `.txt`, `.html`)
 - **Hybrid corpus handling** (use raw PDFs directly, plus optional converted Markdown)
 - **Configurable chunking** with `RecursiveCharacterTextSplitter`
-- **Embedding + vector index pipeline** (Ollama embeddings + FAISS)
+- **Embedding + vector index pipeline** (HuggingFace or Ollama embeddings + FAISS)
 - **Hybrid retrieval** using FAISS similarity + BM25 fusion
 - **Citation-aware answer generation** from retrieved context
 - **Streaming generation** in CLI and API (NDJSON events)
@@ -61,11 +61,17 @@ The current repository contains a working MVP with:
 
 ## LLM / Embedding Backends
 
-This project uses Ollama through LangChain.
+TechRAG supports backend switching via `config.yaml`:
 
-- `models.embedding` and `models.llm` in `config.yaml` are passed to Ollama.
-- Both local models (for example `mxbai-embed-large`) and Ollama cloud-tagged models (for example `glm-5:cloud`) can be used, as long as they are available in your `ollama list` environment.
-- If you change embedding model, rebuild the index (`ingest.py`) before querying.
+- LLM backends: `groq` or `ollama`
+- Embedding backends: `huggingface` or `ollama`
+
+HF Spaces-friendly default:
+
+- `llm_backend: groq` with `GROQ_API_KEY` in environment secrets
+- `embedding_backend: huggingface` with a sentence-transformers model
+
+If you change embedding model or embedding backend, rebuild the index (`ingest.py`) before querying.
 
 ## Running Locally
 
@@ -73,16 +79,37 @@ This project uses Ollama through LangChain.
 uv sync
 ```
 
-### 1. Prepare models in Ollama
+### 1. Configure backend and secrets
 
-Examples:
+Current default in `config.yaml` is:
+
+- LLM: Groq (`llama-3.3-70b-versatile`)
+- Embeddings: HuggingFace (`sentence-transformers/all-MiniLM-L6-v2`)
+
+Set your API key:
 
 ```bash
-ollama pull nomic-embed-text-v2-moe
-ollama pull glm-5:cloud
+export GROQ_API_KEY=your_key_here
 ```
 
-Use whichever models you configure in `config.yaml`.
+For local development you can also keep it in `.env`:
+
+```dotenv
+GROQ_API_KEY=your_key_here
+```
+
+See `.env.example` for the minimal secret template.
+
+Optional local Ollama mode:
+
+```yaml
+models:
+  llm_backend: ollama
+  embedding_backend: ollama
+  llm: glm-5:cloud
+  embedding: nomic-embed-text-v2-moe
+  base_url: http://localhost:11434
+```
 
 ### 2. Build / rebuild index
 
@@ -190,8 +217,10 @@ retrieval:
   hybrid_weight: 0.6
 
 models:
-  llm: glm-5:cloud
-  embedding: nomic-embed-text-v2-moe
+  llm_backend: groq
+  embedding_backend: huggingface
+  llm: llama-3.3-70b-versatile
+  embedding: sentence-transformers/all-MiniLM-L6-v2
   base_url: http://localhost:11434
 
 storage:
@@ -221,7 +250,9 @@ In most runs, `llm_inference_ms` dominates total time.
 - Error: `No supported documents found in data`
   - Add `.md`, `.txt`, `.pdf`, or `.html` files to `data/`, then rerun ingestion.
 - Error: model not found
-  - Ensure the model name in `config.yaml` exists in `ollama list`.
+  - In Ollama mode: ensure the model exists in `ollama list`.
+- Error: missing `GROQ_API_KEY`
+  - Set `GROQ_API_KEY` in env (or HF Space secrets / local `.env`) when `llm_backend: groq`.
 - Retrieval quality drops after changing embedding model
   - Rebuild index with `uv run python ingest.py --source data`.
 

@@ -7,8 +7,9 @@ from pathlib import Path
 import yaml
 from langchain.docstore.document import Document
 from langchain_community.vectorstores import FAISS
-from langchain_ollama import OllamaEmbeddings
 from rank_bm25 import BM25Okapi
+
+from backends import get_embeddings
 
 
 def load_config(config_path: str = "config.yaml") -> dict:
@@ -28,10 +29,7 @@ class HybridRetriever:
         cfg = load_config(config_path)
         self.cfg = cfg
 
-        embeddings = OllamaEmbeddings(
-            model=cfg["models"]["embedding"],
-            base_url=cfg["models"]["base_url"],
-        )
+        embeddings = get_embeddings(cfg)
         self.vectorstore = FAISS.load_local(
             cfg["storage"]["index_dir"],
             embeddings,

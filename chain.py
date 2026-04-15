@@ -6,8 +6,8 @@ from time import perf_counter
 from typing import Iterator
 
 import yaml
-from langchain_ollama import ChatOllama
 
+from backends import get_llm
 from retriever import HybridRetriever
 
 
@@ -35,11 +35,7 @@ class TechRAG:
     def __init__(self, config_path: str = "config.yaml") -> None:
         self.cfg = load_config(config_path)
         self.retriever = HybridRetriever(config_path=config_path)
-        self.llm = ChatOllama(
-            model=self.cfg["models"]["llm"],
-            base_url=self.cfg["models"]["base_url"],
-            temperature=0.1,
-        )
+        self.llm = get_llm(self.cfg)
 
     def _build_prompt(self, query: str, contexts: list[dict]) -> str:
         context_block = "\n\n".join(
@@ -59,14 +55,18 @@ class TechRAG:
         answer, _ = self.ask_with_timings(query, top_k=top_k)
         return answer
 
-    def _raise_ollama_model_error(self, exc: Exception) -> None:
+    def _raise_llm_error(self, exc: Exception) -> None:
+        models = self.cfg.get("models", {})
+        llm_backend = models.get("llm_backend", "ollama").lower()
         msg = str(exc)
-        if "model" in msg and "not found" in msg:
-            llm_name = self.cfg["models"]["llm"]
+        if llm_backend == "ollama" and "model" in msg and "not found" in msg:
+            llm_name = models["llm"]
             raise RuntimeError(
                 f"Ollama model '{llm_name}' is not available locally. "
                 f"Run: ollama pull {llm_name}"
             ) from exc
+        if llm_backend == "groq" and "api" in msg.lower() and "key" in msg.lower():
+            raise RuntimeError("Groq authentication failed. Check GROQ_API_KEY.") from exc
 
     def prepare_query(self, query: str, top_k: int | None = None) -> PreparedQuery:
         t0 = perf_counter()
@@ -100,7 +100,7 @@ class TechRAG:
                 if isinstance(text, str) and text:
                     yield text
         except Exception as exc:
-            self._raise_ollama_model_error(exc)
+            self._raise_llm_error(exc)
             raise
 
     def ask_with_timings(self, query: str, top_k: int | None = None) -> tuple[Answer, dict[str, float]]:
@@ -109,7 +109,7 @@ class TechRAG:
         try:
             reply = self.llm.invoke(prepared.prompt)
         except Exception as exc:
-            self._raise_ollama_model_error(exc)
+            self._raise_llm_error(exc)
             raise
         t1 = perf_counter()
 

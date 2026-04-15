@@ -9,9 +9,10 @@ import yaml
 from bs4 import BeautifulSoup
 from langchain.docstore.document import Document
 from langchain_community.vectorstores import FAISS
-from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
+
+from backends import get_embeddings
 
 SUPPORTED_EXTENSIONS = {".txt", ".md", ".markdown", ".html", ".htm", ".pdf"}
 
@@ -98,10 +99,7 @@ def main() -> None:
     for i, chunk in enumerate(chunks):
         chunk.metadata["chunk_id"] = i
 
-    embeddings = OllamaEmbeddings(
-        model=cfg["models"]["embedding"],
-        base_url=cfg["models"]["base_url"],
-    )
+    embeddings = get_embeddings(cfg)
 
     vectorstore = FAISS.from_documents(chunks, embeddings)
 

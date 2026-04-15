@@ -7,8 +7,10 @@ retrieval:
   hybrid_weight: 0.6
 
 models:
-  llm: glm-5:cloud
-  embedding: mxbai-embed-large
+  llm_backend: groq
+  embedding_backend: huggingface
+  llm: llama-3.3-70b-versatile
+  embedding: sentence-transformers/all-MiniLM-L6-v2
   base_url: http://localhost:11434
 
 storage:
