@@ -1,30 +1,18 @@
----
-title: Techrag
-emoji: 🚀
-colorFrom: red
-colorTo: red
-sdk: docker
-app_port: 8501
-tags:
-- streamlit
-pinned: false
-short_description: Streamlit template space
----
 # TechRAG
 
 <p align="center">
+  <a href="https://huggingface.co/spaces/turancannb02/techrag"><img src="https://img.shields.io/badge/HuggingFace%20Spaces-Live%20Demo-FFD21E?style=plastic&logo=huggingface&logoColor=black" alt="Hugging Face Live Demo"></a>
   <img src="https://img.shields.io/badge/Language-Python-blue?style=plastic&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/Framework-LangChain-0EA5E9?style=plastic" alt="LangChain">
   <img src="https://img.shields.io/badge/Vector%20Store-FAISS-111827?style=plastic" alt="FAISS">
   <img src="https://img.shields.io/badge/API-FastAPI-009688?style=plastic&logo=fastapi&logoColor=white" alt="FastAPI">
   <img src="https://img.shields.io/badge/UI-Streamlit-FF4B4B?style=plastic&logo=streamlit&logoColor=white" alt="Streamlit">
   <img src="https://img.shields.io/badge/Package%20Manager-uv-4B5563?style=plastic" alt="uv">
-  <img src="https://img.shields.io/badge/Inference-Groq%20%7C%20Ollama-111827?style=plastic" alt="Groq and Ollama">
 </p>
 
-A production-oriented retrieval-augmented generation (RAG) project for technical documentation.
+A production-oriented retrieval-augmented generation (RAG) system for technical documentation.
 
-The project is implemented as a practical local-first pipeline: ingest documents, build FAISS index, run hybrid retrieval, and generate grounded answers with citations.
+TechRAG uses a practical local-first workflow: ingest documents, build a FAISS index, run hybrid retrieval (semantic + BM25), and generate grounded answers with citations.
 
 ## Live Demo
 
