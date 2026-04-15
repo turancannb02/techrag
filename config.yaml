@@ -1,0 +1,16 @@
+chunking:
+  chunk_size: 512
+  overlap: 64
+
+retrieval:
+  top_k: 5
+  hybrid_weight: 0.6
+
+models:
+  llm: glm-5:cloud
+  embedding: mxbai-embed-large
+  base_url: http://localhost:11434
+
+storage:
+  index_dir: storage/faiss
+  chunks_file: storage/chunks.jsonl
