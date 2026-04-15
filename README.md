@@ -26,6 +26,15 @@ A production-oriented retrieval-augmented generation (RAG) project for technical
 
 The project is implemented as a practical local-first pipeline: ingest documents, build FAISS index, run hybrid retrieval, and generate grounded answers with citations.
 
+## Live Demo
+
+- Hugging Face Space: https://huggingface.co/spaces/turancannb02/techrag
+
+## Branches
+
+- `main`: primary development branch (local-first workflow and project source of truth)
+- `hf-space`: deployment-focused branch for Hugging Face Spaces runtime/integration
+
 ## What This Is
 
 TechRAG is built to explore and operate a full RAG workflow over technical corpora (standards, engineering docs, and research text) without hiding core decisions behind abstraction-heavy wrappers.
