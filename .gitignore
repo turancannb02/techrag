@@ -1,0 +1,10 @@
+.history/
+.venv/
+__pycache__/
+*.pyc
+storage/
+.DS_Store
+
+storage/
+data/raw/
+data/processed_md/
